@@ -33,6 +33,10 @@ services:
     ports: 
       - 3012:80
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.compose
+      context: ./FrontEnd/FrontEnd
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+
+
 
