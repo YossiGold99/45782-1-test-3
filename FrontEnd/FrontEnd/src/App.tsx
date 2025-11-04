@@ -1,7 +1,69 @@
 import { useState, useEffect } from 'react';
 import { teamsApi } from './services/api';
 import type { DevelopmentTeam, Meeting, CreateMeetingData } from './services/api';
-import './App.css';
+import {
+  Container,
+  Typography,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Card,
+  CardContent,
+  CardHeader,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Alert,
+  CircularProgress,
+  ToggleButton,
+  ToggleButtonGroup,
+  Chip,
+} from '@mui/material';
+import {
+  Event as EventIcon,
+  MeetingRoom as RoomIcon,
+  Schedule as ScheduleIcon,
+  Add as AddIcon,
+  ViewModule as ViewModuleIcon,
+  TableChart as TableChartIcon,
+} from '@mui/icons-material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+const theme = createTheme({
+  direction: 'rtl',
+  palette: {
+    primary: {
+      main: '#667eea',
+    },
+    secondary: {
+      main: '#764ba2',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
+});
 
 function App() {
   const [teams, setTeams] = useState<DevelopmentTeam[]>([]);
@@ -40,8 +102,10 @@ function App() {
       if (teamsData.length > 0 && !selectedTeamCode) {
         setSelectedTeamCode(teamsData[0].team_code);
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to load teams';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { error?: string } }; message?: string }).response?.data?.error ||
+        (err as { message?: string }).message ||
+        'Failed to load teams';
       setError(errorMessage);
       console.error('Error loading teams:', err);
     } finally {
@@ -55,8 +119,10 @@ function App() {
       setError('');
       const meetingsData = await teamsApi.getMeetingsByTeam(teamCode);
       setMeetings(meetingsData);
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to load meetings';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { error?: string } }; message?: string }).response?.data?.error ||
+        (err as { message?: string }).message ||
+        'Failed to load meetings';
       setError(errorMessage);
       console.error('Error loading meetings:', err);
     } finally {
@@ -64,9 +130,10 @@ function App() {
     }
   };
 
-  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTeamCode(e.target.value);
-    setFormData({ ...formData, team_code: e.target.value });
+  const handleTeamChange = (e: { target: { value: string } }) => {
+    const teamCode = e.target.value;
+    setSelectedTeamCode(teamCode);
+    setFormData({ ...formData, team_code: teamCode });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -76,9 +143,9 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.team_code || !formData.start_datetime || !formData.end_datetime || !formData.room_name) {
-      setError('All fields are required');
+      setError('כל השדות הנדרשים צריכים להיות מלאים');
       return;
     }
 
@@ -95,8 +162,11 @@ function App() {
         room_name: '',
       });
       await loadMeetings(selectedTeamCode);
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to create meeting');
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { error?: string } }; message?: string }).response?.data?.error ||
+        (err as { message?: string }).message ||
+        'Failed to create meeting';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -113,202 +183,248 @@ function App() {
     });
   };
 
+  const selectedTeam = teams.find(t => t.team_code === selectedTeamCode);
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Schedule Management</h1>
-        <p>ניהול פגישות קבוצות פיתוח</p>
-      </header>
-
-      <main className="app-main">
-        <div className="teams-section">
-          <label htmlFor="team-select" className="label">
-            בחר קבוצת פיתוח:
-          </label>
-          <select
-            id="team-select"
-            value={selectedTeamCode}
-            onChange={handleTeamChange}
-            className="select"
-            disabled={loading}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: 3,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              textAlign: 'center',
+              color: 'white',
+              mb: 4,
+            }}
           >
-            <option value="">-- בחר קבוצה --</option>
-            {teams.map((team) => (
-              <option key={team.team_code} value={team.team_code}>
-                {team.team_name}
-              </option>
-            ))}
-          </select>
-        </div>
+            <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 700, textShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}>
+              Schedule Management
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 }}>
+              ניהול פגישות קבוצות פיתוח
+            </Typography>
+            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+              מהבית היוצר של גולד
+            </Typography>
 
-        {error && <div className="error-message">{error}</div>}
+          </Box>
 
-        {selectedTeamCode && (
-          <div className="meetings-section">
-            <div className="section-header">
-              <h2>פגישות של {teams.find(t => t.team_code === selectedTeamCode)?.team_name}</h2>
-              <button
-                onClick={() => {
-                  setShowAddForm(true);
-                  setFormData({ ...formData, team_code: selectedTeamCode });
-                }}
-                className="btn btn-primary"
+          <Paper elevation={8} sx={{ p: 4, borderRadius: 3 }}>
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <InputLabel id="team-select-label">בחר קבוצת פיתוח</InputLabel>
+              <Select
+                labelId="team-select-label"
+                id="team-select"
+                value={selectedTeamCode}
+                onChange={handleTeamChange}
+                label="בחר קבוצת פיתוח"
+                disabled={loading}
               >
-                הוסף פגישה חדשה
-              </button>
-            </div>
-
-            {showAddForm && (
-              <div className="form-container">
-                <h3>הוספת פגישה חדשה</h3>
-                <form onSubmit={handleSubmit} className="form">
-                  <div className="form-group">
-                    <label htmlFor="start_datetime">תאריך ושעת התחלה *</label>
-                    <input
-                      type="datetime-local"
-                      id="start_datetime"
-                      name="start_datetime"
-                      value={formData.start_datetime}
-                      onChange={handleInputChange}
-                      required
-                      className="input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="end_datetime">תאריך ושעת סיום *</label>
-                    <input
-                      type="datetime-local"
-                      id="end_datetime"
-                      name="end_datetime"
-                      value={formData.end_datetime}
-                      onChange={handleInputChange}
-                      required
-                      className="input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="room_name">שם החדר *</label>
-                    <input
-                      type="text"
-                      id="room_name"
-                      name="room_name"
-                      value={formData.room_name}
-                      onChange={handleInputChange}
-                      required
-                      className="input"
-                      placeholder="לדוגמה: Blue Room"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="description">תיאור הפגישה</label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description || ''}
-                      onChange={handleInputChange}
-                      className="textarea"
-                      rows={4}
-                      placeholder="תיאור הפגישה..."
-                    />
-                  </div>
-
-                  <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                      {loading ? 'שומר...' : 'שמור פגישה'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAddForm(false);
-                        setError('');
-                      }}
-                      className="btn btn-secondary"
-                    >
-                      ביטול
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            <div className="view-controls">
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`view-btn ${viewMode === 'cards' ? 'active' : ''}`}
-              >
-                כרטיסיות
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
-              >
-                טבלה
-              </button>
-            </div>
-
-            {loading && meetings.length === 0 ? (
-              <div className="loading">טוען...</div>
-            ) : meetings.length === 0 ? (
-              <div className="no-meetings">אין פגישות עבור קבוצה זו</div>
-            ) : viewMode === 'table' ? (
-              <div className="meetings-table-container">
-                <table className="meetings-table">
-                  <thead>
-                    <tr>
-                      <th>חדר</th>
-                      <th>תאריך ושעת התחלה</th>
-                      <th>תאריך ושעת סיום</th>
-                      <th>תיאור</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {meetings.map((meeting) => (
-                      <tr key={meeting.meeting_code}>
-                        <td>{meeting.room_name}</td>
-                        <td>{formatDateTime(meeting.start_datetime)}</td>
-                        <td>{formatDateTime(meeting.end_datetime)}</td>
-                        <td>{meeting.description || '-'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="meetings-grid">
-                {meetings.map((meeting) => (
-                  <div key={meeting.meeting_code} className="meeting-card">
-                    <div className="meeting-header">
-                      <h3>{meeting.room_name}</h3>
-                    </div>
-                    <div className="meeting-body">
-                      <div className="meeting-info">
-                        <div className="info-item">
-                          <span className="info-label">התחלה:</span>
-                          <span className="info-value">{formatDateTime(meeting.start_datetime)}</span>
-                        </div>
-                        <div className="info-item">
-                          <span className="info-label">סיום:</span>
-                          <span className="info-value">{formatDateTime(meeting.end_datetime)}</span>
-                        </div>
-                        {meeting.description && (
-                          <div className="info-item">
-                            <span className="info-label">תיאור:</span>
-                            <span className="info-value">{meeting.description}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                {teams.map((team) => (
+                  <MenuItem key={team.team_code} value={team.team_code}>
+                    {team.team_name}
+                  </MenuItem>
                 ))}
-              </div>
+              </Select>
+            </FormControl>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
             )}
-          </div>
-        )}
-      </main>
-    </div>
+
+            {selectedTeamCode && (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                  <Typography variant="h5" component="h2" sx={{ fontWeight: 600 }}>
+                    פגישות של {selectedTeam?.team_name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <ToggleButtonGroup
+                      value={viewMode}
+                      exclusive
+                      onChange={(_, newMode) => {
+                        if (newMode !== null) {
+                          setViewMode(newMode);
+                        }
+                      }}
+                      size="small"
+                    >
+                      <ToggleButton value="cards">
+                        <ViewModuleIcon sx={{ mr: 1 }} />
+                        כרטיסיות
+                      </ToggleButton>
+                      <ToggleButton value="table">
+                        <TableChartIcon sx={{ mr: 1 }} />
+                        טבלה
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => {
+                        setShowAddForm(true);
+                        setFormData({ ...formData, team_code: selectedTeamCode });
+                      }}
+                      sx={{ minWidth: 150 }}
+                    >
+                      הוסף פגישה
+                    </Button>
+                  </Box>
+                </Box>
+
+                <Dialog open={showAddForm} onClose={() => setShowAddForm(false)} maxWidth="sm" fullWidth>
+                  <form onSubmit={handleSubmit}>
+                    <DialogTitle>הוספת פגישה חדשה</DialogTitle>
+                    <DialogContent>
+                      <TextField
+                        fullWidth
+                        label="תאריך ושעת התחלה"
+                        type="datetime-local"
+                        name="start_datetime"
+                        value={formData.start_datetime}
+                        onChange={handleInputChange}
+                        required
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="תאריך ושעת סיום"
+                        type="datetime-local"
+                        name="end_datetime"
+                        value={formData.end_datetime}
+                        onChange={handleInputChange}
+                        required
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="שם החדר"
+                        name="room_name"
+                        value={formData.room_name}
+                        onChange={handleInputChange}
+                        required
+                        margin="normal"
+                        placeholder="לדוגמה: Blue Room"
+                      />
+                      <TextField
+                        fullWidth
+                        label="תיאור הפגישה"
+                        name="description"
+                        value={formData.description || ''}
+                        onChange={handleInputChange}
+                        multiline
+                        rows={4}
+                        margin="normal"
+                        placeholder="תיאור הפגישה..."
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setShowAddForm(false)}>ביטול</Button>
+                      <Button type="submit" variant="contained" disabled={loading}>
+                        {loading ? 'שומר...' : 'שמור פגישה'}
+                      </Button>
+                    </DialogActions>
+                  </form>
+                </Dialog>
+
+                {loading && meetings.length === 0 ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : meetings.length === 0 ? (
+                  <Alert severity="info">אין פגישות עבור קבוצה זו</Alert>
+                ) : viewMode === 'table' ? (
+                  <TableContainer component={Paper} elevation={2}>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: 'primary.main' }}>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>חדר</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>תאריך ושעת התחלה</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>תאריך ושעת סיום</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>תיאור</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {meetings.map((meeting) => (
+                          <TableRow key={meeting.meeting_code} hover>
+                            <TableCell>
+                              <Chip icon={<RoomIcon />} label={meeting.room_name} color="primary" variant="outlined" />
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <ScheduleIcon fontSize="small" color="action" />
+                                {formatDateTime(meeting.start_datetime)}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <ScheduleIcon fontSize="small" color="action" />
+                                {formatDateTime(meeting.end_datetime)}
+                              </Box>
+                            </TableCell>
+                            <TableCell>{meeting.description || '-'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+                    {meetings.map((meeting) => (
+                      <Card key={meeting.meeting_code} elevation={4} sx={{ transition: 'all 0.3s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 } }}>
+                        <CardHeader
+                          avatar={<EventIcon color="primary" />}
+                          title={
+                            <Chip icon={<RoomIcon />} label={meeting.room_name} color="primary" size="small" />
+                          }
+                        />
+                        <CardContent>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <ScheduleIcon fontSize="small" color="action" />
+                              <Typography variant="body2" color="text.secondary">
+                                התחלה:
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {formatDateTime(meeting.start_datetime)}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <ScheduleIcon fontSize="small" color="action" />
+                              <Typography variant="body2" color="text.secondary">
+                                סיום:
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {formatDateTime(meeting.end_datetime)}
+                              </Typography>
+                            </Box>
+                            {meeting.description && (
+                              <Typography variant="body2" sx={{ mt: 1 }}>
+                                <strong>תיאור:</strong> {meeting.description}
+                              </Typography>
+                            )}
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }
 
