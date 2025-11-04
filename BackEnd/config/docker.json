@@ -1,6 +1,9 @@
 {
     "db": {
         "host": "host.docker.internal",
-        "port": 3308
+        "port": 3309,
+        "username": "root",
+        "password": "",
+        "database": "schedule_management"
     }
 }

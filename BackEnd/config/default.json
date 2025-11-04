@@ -1,15 +1,15 @@
 {
     "app": {
         "port": 3000,
-        "name": "weezer dev",
+        "name": "Schedule Management API",
         "secret": "MySecret",
         "jwtSecret": "JwtSecret"
     },
     "db": {
         "host": "localhost",
-        "port": 3306,
+        "port": 3309,
         "username": "root",
         "password": "",
-        "database": "weezer"
+        "database": "schedule_management"
     }
 }

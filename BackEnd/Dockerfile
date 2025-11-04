@@ -24,4 +24,3 @@ CMD ["npm", "start"]
 
 
 
-# docker run --name weezer-backend -d -e NODE_ENV=docker  -p 3010:3000 shaharsol/weezer-backend:3.0.0

@@ -23,7 +23,7 @@ services:
       - NODE_ENV=compose
     ports:
       - "3020:3000"
-    build: ./backend
+    build: ./BackEnd
     depends_on:
       database:
         condition: service_healthy

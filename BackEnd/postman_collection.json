@@ -1,0 +1,107 @@
+{
+	"info": {
+		"_postman_id": "schedule-management-api",
+		"name": "Schedule Management API",
+		"description": "RESTful API for managing development team meetings",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Teams",
+			"item": [
+				{
+					"name": "Get All Teams",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/teams",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"teams"
+							]
+						},
+						"description": "החזרת כל קבוצות הפיתוח שבחברה"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Meetings by Team",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/teams/:teamCode/meetings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"teams",
+								":teamCode",
+								"meetings"
+							],
+							"variable": [
+								{
+									"key": "teamCode",
+									"value": "",
+									"description": "UUID of the team"
+								}
+							]
+						},
+						"description": "החזרת כל הפגישות של קבוצת פיתוח ספציפית לפי קוד קבוצת פיתוח"
+					},
+					"response": []
+				}
+			],
+			"description": "Operations related to development teams"
+		},
+		{
+			"name": "Meetings",
+			"item": [
+				{
+					"name": "Create Meeting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"team_code\": \"\",\n    \"start_datetime\": \"2024-01-20T10:00:00\",\n    \"end_datetime\": \"2024-01-20T11:30:00\",\n    \"description\": \"Team meeting description\",\n    \"room_name\": \"Blue Room\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/meetings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"meetings"
+							]
+						},
+						"description": "הוספת פגישה חדשה"
+					},
+					"response": []
+				}
+			],
+			"description": "Operations related to meetings"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3020",
+			"type": "string"
+		}
+	]
+}
+
