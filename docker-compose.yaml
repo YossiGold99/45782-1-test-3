@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: schedule-management-db-compose
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_DATABASE=schedule_management
+      - MYSQL_TCP_PORT=3306
+    ports:
+      - "3309:3306"
+    build: ./DataBase
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+  
+  backend:
+    container_name: schedule-management-backend-compose
+    environment:
+      - NODE_ENV=compose
+    ports:
+      - "3020:3000"
+    build: ./backend
+    depends_on:
+      database:
+        condition: service_healthy
+        
+  frontend:
+    container_name: schedule-management-frontend-compose
+    ports: 
+      - 3012:80
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.compose
+
